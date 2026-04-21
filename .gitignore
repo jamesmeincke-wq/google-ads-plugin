@@ -1,0 +1,7 @@
+.env
+*.pyc
+__pycache__/
+google_ads_rules.json
+google_ads_token.json
+*.log
+.DS_Store
