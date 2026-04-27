@@ -1,0 +1,9 @@
+{
+  "name": "google-ads-manager",
+  "version": "1.0.0",
+  "description": "Full-stack Google Ads management — campaign performance, keyword analysis, ad creation, budget automation rules, auction insights, quality scores, and more via a Python CLI.",
+  "author": {
+    "name": "James Meincke",
+    "url": "https://360learning.com"
+  }
+}
