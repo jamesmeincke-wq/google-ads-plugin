@@ -1221,10 +1221,12 @@ def cmd_bulk_update_bids(client, args):
         print(f"Error: {resp.text}")
         return
     responses = resp.json().get("mutateOperationResponses", [])
-    succeeded = len([r for r in responses if "adGroupCriterionResult" in r])
-    print(f"Bulk bid update: {succeeded}/{len(updates)} succeeded")
-    for e in updates:
-        print(f"  AdGroup {e['ad_group_id']} / Criterion {e['criterion_id']} → {int(e['cpc_bid_micros']) / 1_000_000:.2f}")
+    succeeded = [r for r in responses if "adGroupCriterionResult" in r]
+    failed = len(updates) - len(succeeded)
+    print(f"Bulk bid update: {len(succeeded)}/{len(updates)} succeeded")
+    for i, e in enumerate(updates):
+        status = "OK" if i < len(succeeded) else "FAILED"
+        print(f"  [{status}] AdGroup {e['ad_group_id']} / Criterion {e['criterion_id']} → {int(e['cpc_bid_micros']) / 1_000_000:.2f}")
 
 
 # ─── Extensions ───────────────────────────────────────────────────────────────

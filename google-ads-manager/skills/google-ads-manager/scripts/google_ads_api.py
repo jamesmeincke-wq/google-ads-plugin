@@ -13,12 +13,13 @@ TOKEN_URL = "https://oauth2.googleapis.com/token"
 
 
 def format_customer_id(customer_id: str) -> str:
-    customer_id = str(customer_id).replace('"', '').replace("'", '').replace('-', '')
-    return ''.join(c for c in customer_id if c.isdigit()).zfill(10)
+    return ''.join(c for c in str(customer_id) if c.isdigit()).zfill(10)
 
 
 class GoogleAdsClient:
     def __init__(self):
+        self._token = None
+        self._token_expiry = None
         self.client_id = self._load("GOOGLE_ADS_CLIENT_ID")
         self.client_secret = self._load("GOOGLE_ADS_CLIENT_SECRET")
         self.refresh_token = self._load("GOOGLE_ADS_REFRESH_TOKEN")
@@ -63,6 +64,10 @@ class GoogleAdsClient:
         return None
 
     def get_access_token(self) -> str:
+        import time
+        now = time.time()
+        if self._token and self._token_expiry and now < self._token_expiry - 60:
+            return self._token
         resp = requests.post(TOKEN_URL, data={
             "client_id": self.client_id,
             "client_secret": self.client_secret,
@@ -71,7 +76,10 @@ class GoogleAdsClient:
         }, timeout=30)
         if resp.status_code != 200:
             raise ValueError(f"Token refresh failed ({resp.status_code}): {resp.text}")
-        return resp.json()["access_token"]
+        data = resp.json()
+        self._token = data["access_token"]
+        self._token_expiry = now + data.get("expires_in", 3600)
+        return self._token
 
     def get_headers(self, customer_id: Optional[str] = None) -> Dict[str, str]:
         token = self.get_access_token()
